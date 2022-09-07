@@ -1,29 +1,39 @@
-import React, { useState } from 'react';
+import React from 'react';
 import Button from 'components/atoms/Button/Button';
 import Input from 'components/atoms/Input/Input';
 import Title from 'components/atoms/Title/Title';
 import { StyledForm } from './Form.styled';
 import { nanoid } from 'nanoid';
+import { useLocaleStorage } from '../../../hooks/useLocalStorage';
+import { useDispatch } from "react-redux";
+import { create } from '../../../redux/phoneBookActions'
 
 const ContactForm = ({ onSubmit }) => {
-  const [name, setName] = useState();
-  const [number, setNumber] = useState();
+  const [name, setName] = useLocaleStorage('name', '');
+  const [number, setNumber] = useLocaleStorage('number', '');
+  const dispatch = useDispatch();
 
-  const onChange = event =>
-    event.currentTarget.name === 'name'
-      ? setName(event.currentTarget.value)
-      : setNumber(event.currentTarget.value);
+  const onChange = event => {
+    const { name, value } = event.target;
+    switch (name) {
+      case "name":
+        setName(value);
+        break;
+      case "number":
+        setNumber(value);
+        break;
+
+      default:
+        return;
+    }
+  };
 
   const handleAddContact = event => {
     event.preventDefault();
 
-    const addedContact = {
-      id: 'id-' + nanoid(2),
-      name: name,
-      number: number,
-    };
+    const contact = { id: 'id-' + nanoid(2), name, number };
+    dispatch(create(contact));
 
-    onSubmit(addedContact);
     resetContactForm();
   };
 
